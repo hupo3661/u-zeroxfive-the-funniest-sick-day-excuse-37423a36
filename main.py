@@ -14,17 +14,36 @@ EXCUSE = (
 )
 
 
+def validate(text: str) -> str:
+    """Check the excuse against the brief; return it unchanged if valid.
+
+    The brief requires a single line of 1-200 characters that is not
+    blank. Raises ValueError naming the first failed rule.
+    """
+    if not text.strip():
+        raise ValueError("excuse must not be blank")
+    if "\n" in text or "\r" in text:
+        raise ValueError("excuse must be a single line")
+    if not 1 <= len(text) <= 200:
+        raise ValueError(
+            f"excuse must be 1-200 characters, got {len(text)}"
+        )
+    return text
+
+
 def main() -> int:
-    if not 1 <= len(EXCUSE) <= 200 or not EXCUSE.strip():
-        print("error: excuse fails the 1-200 character gate", file=sys.stderr)
+    try:
+        excuse = validate(EXCUSE)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
         return 1
     out_dir = os.environ.get("OUTPUT_DIR", "/output")
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, "entry.txt")
     with open(path, "w", encoding="utf-8") as f:
-        f.write(EXCUSE)
-    print(EXCUSE)
-    print(f"wrote {len(EXCUSE)} characters to {path}")
+        f.write(excuse)
+    print(excuse)
+    print(f"wrote {len(excuse)} characters to {path}")
     return 0
 
 
